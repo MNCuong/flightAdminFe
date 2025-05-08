@@ -4,7 +4,8 @@ import {
     BoxMultiple1Icon, LoginIcon,
     MoodHappyIcon, ApertureIcon, UserPlusIcon,
     PlaneIcon, PlaneDepartureIcon,
-    UserIcon, ChartPieIcon, LogoutIcon
+    UserIcon, ChartPieIcon, LogoutIcon,
+    BookmarkIcon
 } from 'vue-tabler-icons';
 
 const sidebarItem = [
@@ -49,7 +50,7 @@ const sidebarItem = [
         //         icon: PlaneDepartureIcon
         //     }
         // ]
-    to: '/flights'
+        to: '/flights'
     },
 
     {
@@ -68,14 +69,21 @@ const sidebarItem = [
         //         icon: UserIcon
         //     }
         // ]
-        to: '/'
+        to: '/customer'
 
     },
+    {
+        title: 'Quản lý đặt vé',
+        icon: BookmarkIcon,
+        BgColor: 'primary',
+        to: '/booking'
+    },
+
     {
         title: 'Báo cáo thống kê',
         icon: ChartPieIcon,
         BgColor: 'primary',
-        to: '/'
+        to: '/statistical-report'
     },
     { header: 'Logout' },
     {
@@ -83,57 +91,6 @@ const sidebarItem = [
         icon: LogoutIcon,
         BgColor: 'primary',
         to: '/'
-    },
-    { header: 'Ui components' },
-    {
-        title: 'Alert',
-        icon: AlertCircleIcon,
-        BgColor: 'primary',
-        to: '/ui/alerts',
-    },
-    {
-        title: 'Button',
-        icon: CircleDotIcon,
-        BgColor: 'primary',
-        to: '/ui/buttons',
-    },
-    {
-        title: 'Cards',
-        icon: BoxMultiple1Icon,
-        BgColor: 'primary',
-        to: '/ui/cards',
-    },
-    {
-        title: 'Tables',
-        icon: BorderAllIcon,
-        BgColor: 'primary',
-        to: '/ui/tables',
-    },
-    { header: 'Auth' },
-    {
-        title: 'Login',
-        icon: LoginIcon,
-        BgColor: 'primary',
-        to: '/auth/login',
-    },
-    {
-        title: 'Register',
-        icon: UserPlusIcon,
-        BgColor: 'primary',
-        to: '/auth/register',
-    },
-    { header: 'Extra' },
-    {
-        title: 'Icons',
-        icon: MoodHappyIcon,
-        BgColor: 'primary',
-        to: '/icons',
-    },
-    {
-        title: 'Sample Page',
-        icon: ApertureIcon,
-        BgColor: 'primary',
-        to: '/sample-page',
     },
 ];
 
