@@ -1,12 +1,17 @@
 <!-- AddFlight.vue -->
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const flightCode = ref('');
 const planeNumber = ref('');
 const departureDate = ref('');
 const seats = ref('');
+const router = useRouter();
+function goBack(){
+    router.push({ name: 'FlightList' });
 
+}
 function submitForm() {
     console.log('Chuyến bay mới:', {
         flightCode: flightCode.value,
@@ -20,7 +25,6 @@ function submitForm() {
 
 <template>
     <div>
-        <h1 class="text-h4 mb-4 font-weight-bold">Thêm chuyến bay</h1>
         <v-card class="white pa-4" flat>
             <v-form>
                 <v-text-field
@@ -43,13 +47,13 @@ function submitForm() {
                     v-model="seats"
                     label="Số chỗ ngồi"
                     type="number"
-                    required
+                    required disabled
                 />
 
                 <v-btn color="primary" @click="submitForm" class="mt-4">
                     Thêm chuyến bay
                 </v-btn>
-                <v-btn color="content" @click="submitForm" class="mt-4">
+                <v-btn color="content" @click="goBack" class="mt-4">
                     Quay lại
                 </v-btn>
             </v-form>

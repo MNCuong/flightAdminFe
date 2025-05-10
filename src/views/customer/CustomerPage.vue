@@ -1,61 +1,199 @@
-<!-- <script setup>
-import { ref, onMounted } from 'vue';
-import axios from '../../services';
-import SearchInput from '@/components/common/SearchInput.vue';
-
-const customers = ref([]);
-const searchQuery = ref('');
-
-onMounted(async () => {
-  try {
-    const response = await axios.get('/user/list-user');
-    customers.value = response.data.data;
-  } catch (error) {
-    console.error('Lỗi khi lấy danh sách khách hàng:', error);
-  }
-});
-
-const filteredCustomers = computed(() => {
-  if (!searchQuery.value) return customers.value;
-  return customers.value.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    c.email.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-</script>
-
 <template>
-  <div>
-    <h1 class="text-h5 mb-4 font-weight-bold text-success">Danh sách khách hàng</h1>
+    <v-container>
+        <loading-modal :visible="isLoading" />
+        <v-row class="mb-4" align="center" justify="space-between">
 
-    <v-card flat class="pa-4 mb-4">
-      <v-row justify="space-between" align="center">
-        <v-col cols="12" md="6">
-          <SearchInput
-            label="Tìm kiếm khách hàng"
-            placeholder="Nhập tên hoặc email"
-            v-model:searchQuery="searchQuery"
-          />
-        </v-col>
-      </v-row>
-    </v-card>
 
-    <v-data-table
-      :headers="[
-        { text: '#', value: 'index', width: '50px' },
-        { text: 'Họ tên', value: 'name' },
-        { text: 'Email', value: 'email' },
-        { text: 'Số điện thoại', value: 'phone' },
-        { text: 'Ngày đăng ký', value: 'registeredAt' },
-      ]"
-      :items="filteredCustomers"
-      class="elevation-1"
-      :items-per-page="10"
-      item-value="id"
-    >
-      <template v-slot:item.index="{ index }">
-        {{ index + 1 }}
-      </template>
-    </v-data-table>
-  </div>
-</template> -->
+            <v-col cols="8">
+                <v-text-field v-model="searchQuery" label="Tìm kiếm khách hàng" outlined clearable hide-details="auto" />
+            </v-col>
+            <v-col cols="4">
+                <v-btn color="success" @click="handleExport">Xuất Excel</v-btn>
+            </v-col>
+        </v-row>
+        <v-table>
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên Đầy Đủ</th>
+                <th>Email</th>
+                <th>Số Điện Thoại</th>
+                <th>Vai Trò</th>
+                <th>Thao Tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-if="!users.length && !isLoading">
+                <td colspan="6">Không có dữ liệu</td>
+            </tr>
+            <tr v-for="(user, index) in users" :key="user?.id">
+                <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+                <td>{{ user?.fullName }}</td>
+                <td>{{ user?.email }}</td>
+                <td>{{ user?.phone }}</td>
+                <td>{{ user?.roles }}</td>
+                <td>
+<!--                    <v-btn color="primary" class="mr-2" @click="editUser(user)">Cập nhật</v-btn>-->
+                    <!-- Nút khóa hoặc mở tài khoản -->
+                    <v-btn
+                        v-if="!user.isLocked"
+                        class="red darken-1"
+                        @click="lockAccount(user)"
+                    >
+                        Khóa tài khoản
+                    </v-btn>
+                    <v-btn
+                        v-if="user.isLocked"
+                        class="green darken-1"
+                        @click="unlockAccount(user)"
+                    >
+                        Mở tài khoản
+                    </v-btn>
+
+
+                </td>
+            </tr>
+            </tbody>
+        </v-table>
+
+        <!-- Modal xác nhận xóa -->
+        <confirm-delete-modal :visible="confirmDelete" :flightId="userToDelete?.id" @confirm="confirmDeleteAction" @close="cancelDelete" />
+
+        <!-- Modal thông báo thành công -->
+        <success-modal :visible="isSuccessVisible" :message="'Tài khoản đã được cập nhật thành công!'" @close="closeSuccessModal" />
+
+        <!-- Modal thông báo thất bại -->
+        <error-modal :visible="isErrorVisible" :message="errorMessage" @close="closeErrorModal" />
+
+        <!-- PHÂN TRANG: SỐ TRANG -->
+        <v-pagination v-model="currentPage" :length="pageCount" :total-visible="5" />
+    </v-container>
+</template>
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue';
+import axios from '../../services/api';
+import { useRouter } from 'vue-router';
+import ConfirmDeleteModal from '../../components/ConfirmDeleteModal.vue';
+import SuccessModal from '../../components/SuccessModa.vue';
+import ErrorModal from '../../components/ErrorModal.vue';
+import LoadingModal from '@/components/LoadingModal.vue';
+import 'vuetify/styles';
+import { createVuetify } from 'vuetify';
+const vuetify = createVuetify();
+const router = useRouter();
+
+const users = ref([]);
+const currentPage = ref(1);
+const pageSize = 2;
+const totalItems = ref(0);
+const isLoading = ref(false);
+
+const fetchUsers = async () => {
+    isLoading.value = true;
+
+    try {
+        const response = await axios.get('/user/list-user', {
+            params: {
+                page: currentPage.value - 1,
+                size: pageSize
+            }
+        });
+        users.value = response.data.data.content;
+        totalItems.value = response.data.data.totalElements;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+onMounted(fetchUsers);
+watch(currentPage, () => {
+    fetchUsers();
+});
+
+const pageCount = computed(() => {
+    return Math.ceil(totalItems.value / pageSize);
+});
+
+const confirmDelete = ref(false);
+const userToDelete = ref(null);
+
+function deleteUser(user) {
+    userToDelete.value = user;
+    confirmDelete.value = true;
+}
+
+function confirmDeleteAction() {
+    if (userToDelete.value) {
+        const index = users.value.findIndex((f) => f.id === userToDelete.value.id);
+        if (index !== -1) {
+            users.value.splice(index, 1);
+        }
+    }
+    confirmDelete.value = false;
+}
+
+function cancelDelete() {
+    confirmDelete.value = false;
+}
+
+async function goToPage(page) {
+    currentPage.value = page;
+    await fetchUsers();
+}
+
+function editUser(user) {
+    router.push({ name: 'UpdateUser', params: { id: user.id } });
+}
+
+const isSuccessVisible = ref(false);
+const isErrorVisible = ref(false);
+const errorMessage = ref('');
+
+const closeSuccessModal = () => {
+    isSuccessVisible.value = false;
+};
+
+const closeErrorModal = () => {
+    isErrorVisible.value = false;
+};
+
+// Lock account logic
+const lockAccount = async (user) => {
+    try {
+        const response = await axios.put(`/user/lock/${user.id}`);
+        if (response.status === 200) {
+            user.isLocked = true; // Update the state to locked
+            isSuccessVisible.value = true;
+            errorMessage.value = '';
+        } else {
+            isErrorVisible.value = true;
+            errorMessage.value = 'Không thể khóa tài khoản. Vui lòng thử lại!';
+        }
+    } catch (error) {
+        console.error('Error locking account:', error);
+        isErrorVisible.value = true;
+        errorMessage.value = error.message || 'Có lỗi xảy ra!';
+    }
+};
+
+// Unlock account logic
+const unlockAccount = async (user) => {
+    try {
+        const response = await axios.put(`/user/unlock/${user.id}`);
+        if (response.status === 200) {
+            user.isLocked = false; // Update the state to unlocked
+            isSuccessVisible.value = true;
+            errorMessage.value = '';
+        } else {
+            isErrorVisible.value = true;
+            errorMessage.value = 'Không thể mở tài khoản. Vui lòng thử lại!';
+        }
+    } catch (error) {
+        console.error('Error unlocking account:', error);
+        isErrorVisible.value = true;
+        errorMessage.value = error.message || 'Có lỗi xảy ra!';
+    }
+};
+</script>

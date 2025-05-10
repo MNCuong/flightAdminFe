@@ -1,4 +1,5 @@
 import { createVuetify } from 'vuetify';
+import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
@@ -12,32 +13,32 @@ export default createVuetify({
         defaultTheme: 'BLUE_THEME',
         themes: {
             BLUE_THEME,
-        }
+        },
     },
     defaults: {
         VCard: {
-            rounded: 'xl'
+            rounded: 'xl',
         },
         VTextField: {
             variant: 'outlined',
             density: 'comfortable',
-            color: 'primary'
+            color: 'primary',
         },
         VTextarea: {
             variant: 'outlined',
             density: 'comfortable',
-            color: 'primary'
+            color: 'primary',
         },
         VSelect: {
             variant: 'outlined',
             density: 'comfortable',
-            color: 'primary'
+            color: 'primary',
         },
         VListItem: {
-            minHeight: '45px'
+            minHeight: '45px',
         },
         VTooltip: {
-            location: 'top'
-        }
-    }
+            location: 'top',
+        },
+    },
 });

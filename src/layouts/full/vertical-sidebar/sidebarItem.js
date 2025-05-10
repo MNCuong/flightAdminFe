@@ -1,10 +1,18 @@
 import {
-    LayoutDashboardIcon, BorderAllIcon,
-    AlertCircleIcon, CircleDotIcon,
-    BoxMultiple1Icon, LoginIcon,
-    MoodHappyIcon, ApertureIcon, UserPlusIcon,
-    PlaneIcon, PlaneDepartureIcon,
-    UserIcon, ChartPieIcon, LogoutIcon,
+    LayoutDashboardIcon,
+    BorderAllIcon,
+    AlertCircleIcon,
+    CircleDotIcon,
+    BoxMultiple1Icon,
+    LoginIcon,
+    MoodHappyIcon,
+    ApertureIcon,
+    UserPlusIcon,
+    PlaneIcon,
+    PlaneDepartureIcon,
+    UserIcon,
+    ChartPieIcon,
+    LogoutIcon,
     BookmarkIcon
 } from 'vue-tabler-icons';
 
@@ -70,7 +78,6 @@ const sidebarItem = [
         //     }
         // ]
         to: '/customer'
-
     },
     {
         title: 'Quản lý đặt vé',
@@ -87,11 +94,11 @@ const sidebarItem = [
     },
     { header: 'Logout' },
     {
-        title: 'Logout',
+        title: 'Đăng xuất',
         icon: LogoutIcon,
         BgColor: 'primary',
-        to: '/'
-    },
+        to: '/logout'
+    }
 ];
 
 export default sidebarItem;
