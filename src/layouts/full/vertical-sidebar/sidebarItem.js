@@ -28,37 +28,13 @@ const sidebarItem = [
         title: 'Quản lý phi cơ',
         icon: PlaneIcon,
         BgColor: 'primary',
-        // children: [
-        //     {
-        //         title: 'Danh sách phi cơ',
-        //         to: '/',
-        //         icon: PlaneIcon
-        //     },
-        //     {
-        //         title: 'Thêm phi cơ',
-        //         to: '/',
-        //         icon: PlaneIcon
-        //     }
-        // ]
-        to: '/aircrafts'
+              to: '/aircrafts'
     },
     {
         title: 'Quản lý chuyến bay',
         icon: PlaneDepartureIcon,
         BgColor: 'primary',
-        // children: [
-        //     {
-        //         title: 'Danh sách chuyến bay',
-        //         to: '/',
-        //         icon: PlaneDepartureIcon
-        //     },
-        //     {
-        //         title: 'Tạo chuyến bay mới',
-        //         to: '/',
-        //         icon: PlaneDepartureIcon
-        //     }
-        // ]
-        to: '/flights'
+             to: '/flights'
     },
 
     {
@@ -84,6 +60,23 @@ const sidebarItem = [
         icon: BookmarkIcon,
         BgColor: 'primary',
         to: '/booking'
+    }, {
+        title: 'Quản lý vé',
+        icon: BookmarkIcon,
+        BgColor: 'primary',
+        to: '/tickets'
+    },
+    {
+        title: 'Thông tin hành khách',
+        icon: BookmarkIcon,
+        BgColor: 'primary',
+        to: '/passengers'
+    },
+    {
+        title: 'Quản lý phi hành đoàn',
+        icon: BookmarkIcon,
+        BgColor: 'primary',
+        to: '/crew-members'
     },
 
     {

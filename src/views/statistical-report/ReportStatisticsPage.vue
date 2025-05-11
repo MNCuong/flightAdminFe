@@ -85,17 +85,57 @@
 
     <!-- Biểu đồ thống kê -->
     <v-card class="pa-4">
-        <v-row>
-            <v-col cols="12" md="6">
-                <div class="text-subtitle-1">TỔNG DOANH THU</div>
-                <div class="text-h5 font-weight-bold text-primary">
-                    {{ formatCurrency(totalRevenue) }}
-                </div>
-                <div class="text-success font-weight-bold">
-                    ⬆ {{ growthRate }}%
-                </div>
+
+        <v-row align="center" justify="space-between" class="mb-4">
+            <v-col cols="6" md="3">
+                <v-select
+                    v-model="selectedPeriodType"
+                    :items="['monthly', 'daily', 'quarterly']"
+                    label="Chọn loại thống kê"
+                    @change="fetchRevenueData"
+                />
+            </v-col>
+            <v-col cols="6" md="3">
+                <v-text-field
+                    v-model="selectedYear"
+                    label="Chọn năm"
+                    type="number"
+                    @change="fetchRevenueData"
+                />
+            </v-col>
+            <v-col cols="6" md="3" v-if="selectedPeriodType !== 'quarterly'">
+                <v-text-field
+                    v-model="selectedMonth"
+                    label="Chọn tháng"
+                    type="number"
+                    min="1"
+                    max="12"
+                    @change="fetchRevenueData"
+                    v-if="selectedPeriodType === 'daily'"
+                />
+            </v-col>
+            <v-col cols="6" md="3" v-if="selectedPeriodType === 'quarterly'">
+                <v-text-field
+                    v-model="selectedQuarter"
+                    label="Chọn quý"
+                    type="number"
+                    min="1"
+                    max="4"
+                    @change="fetchRevenueData"
+                />
             </v-col>
         </v-row>
+<!--        <v-row>-->
+<!--            <v-col cols="12" md="6">-->
+<!--                <div class="text-subtitle-1">TỔNG DOANH THU</div>-->
+<!--                <div class="text-h5 font-weight-bold text-primary">-->
+<!--                    {{ formatCurrency(totalRevenue) }}-->
+<!--                </div>-->
+<!--                <div class="text-success font-weight-bold">-->
+<!--                    ⬆ {{ growthRate }}%-->
+<!--                </div>-->
+<!--            </v-col>-->
+<!--        </v-row>-->
 
         <Chart :data="chartData.data" :options="chartData.options" />
     </v-card>
@@ -205,95 +245,70 @@ const paymentDetail = (booking) => {
     router.push({ name: 'PaymentDetail', params: { id: booking.id } });
 };
 
-// Lấy dữ liệu khi trang được tải
 onMounted(() => {
     fetchBookings();
     fetchCustomer();
+    fetchRevenueData();
 });
 
-// Cập nhật dữ liệu khi trang thay đổi
 watch(currentPage, fetchBookings);
-//
-// const charts = ref([
-//     {
-//         title: 'Số lượng vé bán theo tháng',
-//         data: {
-//             labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
-//             datasets: [
-//                 {
-//                     label: 'Vé bán (nghìn vé)',
-//                     borderColor: '#42a5f5',
-//                     backgroundColor: 'rgba(66,165,245,0.2)',
-//                     tension: 0.4,
-//                     data: [200, 220, 250, 300, 280, 310],
-//                     fill: true
-//                 }
-//             ]
-//         },
-//         options: {
-//             responsive: true,
-//             plugins: {
-//                 legend: { position: 'top' },
-//                 title: { display: false }
-//             },
-//             scales: {
-//                 y: {
-//                     beginAtZero: true
-//                 }
-//             }
-//         }
-//     },
-//     {
-//         title: 'Tỷ lệ khách hàng quay lại theo tháng',
-//         data: {
-//             labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
-//             datasets: [
-//                 {
-//                     label: 'Khách hàng quay lại (%)',
-//                     borderColor: '#ff9800',
-//                     backgroundColor: 'rgba(255,152,0,0.2)',
-//                     tension: 0.4,
-//                     data: [45, 50, 55, 53, 60, 65],
-//                     fill: true
-//                 }
-//             ]
-//         },
-//         options: {
-//             responsive: true,
-//             plugins: {
-//                 legend: { position: 'top' },
-//                 title: { display: false }
-//             },
-//             scales: {
-//                 y: {
-//                     beginAtZero: true,
-//                     max: 100
-//                 }
-//             }
-//         }
-//     }
-// ])
 
-const totalRevenue = 22303540 // đồng
-const growthRate = 2374.17
 
 function formatCurrencyReport(value) {
     return value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
 }
 
-const chartData = {
+const selectedPeriodType = ref("monthly");
+const selectedYear = ref(new Date().getFullYear());
+const selectedMonth = ref(new Date().getMonth() + 1);
+const selectedQuarter = ref(1);
+
+const fetchRevenueData = async () => {
+    try {
+        let response;
+        if (selectedPeriodType.value === "monthly") {
+            response = await axios.get('/payment/revenue/monthly', {
+                params: { year: selectedYear.value }
+            });
+            updateChartData(response.data, "monthly");
+        } else if (selectedPeriodType.value === "daily") {
+            response = await axios.get('/payment/revenue/daily', {
+                params: { month: selectedMonth.value, year: selectedYear.value }
+            });
+            updateChartData(response.data, "daily");
+        } else if (selectedPeriodType.value === "quarterly") {
+            response = await axios.get('/payment/revenue/quarter', {
+                params: { quarter: selectedQuarter.value, year: selectedYear.value }
+            });
+            updateChartData(response.data, "quarterly");
+        }
+    } catch (error) {
+        console.error('Lỗi khi lấy doanh thu:', error);
+    }
+};
+
+const updateChartData = (revenueData, periodType) => {
+    if (periodType === "monthly") {
+        chartData.value.data.labels = Object.keys(revenueData);
+        chartData.value.data.datasets[0].data = Object.values(revenueData);
+    } else if (periodType === "daily") {
+        chartData.value.data.labels = Object.keys(revenueData);
+        chartData.value.data.datasets[0].data = Object.values(revenueData);
+    } else if (periodType === "quarterly") {
+        chartData.value.data.labels = Object.keys(revenueData);
+        chartData.value.data.datasets[0].data = Object.values(revenueData);     }
+};
+const chartData = ref({
     data: {
-        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
+        labels: [],
         datasets: [
             {
-                label: 'Doanh thu theo tháng',
-                data: [2e6, 1e6, 3.5e6, 6e6, 7.5e6, 1.5e6],
+                label: 'Doanh thu',
+                data: [],
                 borderColor: '#42a5f5',
                 backgroundColor: 'rgba(66,165,245,0.3)',
                 tension: 0.4,
-                fill: true,
-                pointRadius: 3,
-                pointHoverRadius: 6
+                fill: true
             }
         ]
     },
@@ -303,8 +318,7 @@ const chartData = {
             legend: { display: false },
             tooltip: {
                 callbacks: {
-                    label: (context) =>
-                        formatCurrencyReport(context.raw || 0)
+                    label: (context) => formatCurrencyReport(context.raw || 0)
                 }
             }
         },
@@ -316,15 +330,11 @@ const chartData = {
             }
         }
     }
-}
+});
 
 onMounted(async () => {
-    try {
-        const response = await axios.get('/reports/statistics');
-        stats.value = response.data.data;
-    } catch (error) {
-        console.error('Lỗi khi lấy thống kê:', error);
-    }
+    fetchRevenueData();
+
 });
 </script>
 

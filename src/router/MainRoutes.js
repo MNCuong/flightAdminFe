@@ -88,6 +88,43 @@ const MainRoutes = {
             path: '/account-detail',
             meta: { title: 'Chi tiết tài khoản' },
             component: () => import('@/views/User.vue'),
+        },{
+            name: 'TicketPage',
+            path: '/tickets',
+            meta: { title: 'Danh sách vé' },
+            component: () => import('@/views/ticket/TicketPage.vue'),
+        },{
+            name: 'CrewMemberPage',
+            path: '/crew-members',
+            meta: { title: 'Danh sách thành viên phi hành đoàn' },
+            component: () => import('@/views/crew-member/CrewMemberPage.vue'),
+        },{
+            name: 'CreateCrewMember',
+            path: '/crew-members/create',
+            meta: { title: 'Thêm thành viên phi hành đoàn' },
+            component: () => import('@/views/crew-member/CreateCrewMember.vue'),
+        },
+        {
+            name: 'UpdateCrewMember',
+            path: '/crew-members/update/:id',
+            meta: { title: 'Cập nhật thành viên phi hành đoàn' },
+            component: () => import('@/views/crew-member/UpdateCrewMember.vue'),
+        },{
+            name: 'PassengerPage',
+            path: '/passengers',
+            meta: { title: 'Thông tin khách hàng' },
+            component: () => import('@/views/passenger/PassengerPage.vue'),
+        },
+        {
+            name: 'ViewHistory',
+            path: '/view-history',
+            meta: { title: 'Lịch sử đặt vé của khách hàng' },
+            component: () => import('@/views/passenger/ViewHistory.vue'),
+        },{
+            name: 'AccountDetailPage',
+            path: '/account-detail',
+            meta: { title: 'Chi tiết tài khoản' },
+            component: () => import('@/views/'),
         },
         {
             name: 'Logout',

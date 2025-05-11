@@ -30,9 +30,7 @@ const sDrawer = ref(true);
                     <NavGroup :item="item" v-if="item.header" :key="item.title" />
                     <!---Single Item-->
                     <NavItem :item="item" v-else class="leftPadding" />
-                    <!---End Single Item-->
                 </template>
-                <!-- <Moreoption/> -->
             </v-list>
 
         </perfect-scrollbar>
