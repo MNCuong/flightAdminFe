@@ -3,7 +3,8 @@
         <v-card>
             <v-card-text class="text-center py-4">
                 <v-progress-circular indeterminate color="primary" />
-                <p class="mt-2">Đang tải dữ liệu...</p>
+                <p class="mt-2">
+                    {{ $t('labels.loading') }}</p>
             </v-card-text>
         </v-card>
     </v-dialog>

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import MainRoutes from './MainRoutes';
 import AuthRoutes from './AuthRoutes';
 import { isAuthenticated } from '@/utils/auth';
-
+import i18n from '../../i18n'
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -34,6 +34,9 @@ router.beforeEach((to, from, next) => {
   }
 });
 router.afterEach((to) => {
-  const defaultTitle = 'Hệ thống quản lý chuyến bay';
-  document.title = to.meta?.title || defaultTitle;
+  if (to.meta && to.meta.title) {
+    document.title = i18n.global.t(to.meta.title)
+  } else {
+    document.title = 'Hệ thống quản lý chuyến bay'
+  }
 });

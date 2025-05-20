@@ -1,0 +1,52 @@
+@startuml
+actor FE as "Frontend (Admin)"
+participant "FlightController" as Controller
+participant "FlightService" as Service
+participant "AircraftService" as AircraftSvc
+participant "AirportInfoService" as AirportSvc
+participant "AirlinesRepository" as AirlineRepo
+participant "FlightRepository" as FlightRepo
+database "Database" as DB
+
+FE -> Controller : POST /flights (flightRequest)
+Controller -> Service : createFlight(flightRequest)
+
+'--- Kiểm tra aircraft ---
+Service -> AircraftSvc : getByRegistration(flightRequest.aircraftRegistration)
+AircraftSvc -> DB : SELECT * FROM aircrafts WHERE registration = ?
+DB --> AircraftSvc : Aircraft
+AircraftSvc --> Service : Aircraft
+
+'--- Kiểm tra arrival airport ---
+Service -> AirportSvc : findById(flightRequest.arrivalAirportId)
+AirportSvc -> DB : SELECT * FROM airports WHERE id = ?
+DB --> AirportSvc : AirportInfo
+AirportSvc --> Service : AirportInfo (arrival)
+
+'--- Kiểm tra departure airport ---
+Service -> AirportSvc : findById(flightRequest.departureAirportId)
+AirportSvc -> DB : SELECT * FROM airports WHERE id = ?
+DB --> AirportSvc : AirportInfo
+AirportSvc --> Service : AirportInfo (departure)
+
+'--- Kiểm tra hãng bay ---
+Service -> AirlineRepo : findById(flightRequest.airlineId)
+AirlineRepo -> DB : SELECT * FROM airlines WHERE id = ?
+DB --> AirlineRepo : Airlines
+AirlineRepo --> Service : Airlines
+
+'--- Kiểm tra ghế ngồi ---
+Service -> AircraftSvc : getSeatByRegistration(aircraft.registration)
+AircraftSvc -> DB : SELECT seats FROM aircrafts WHERE registration = ?
+DB --> AircraftSvc : int (seatAvailable)
+AircraftSvc --> Service : int
+
+'--- Tạo flight ---
+Service -> FlightRepo : save(flight)
+FlightRepo -> DB : INSERT INTO flights ...
+DB --> FlightRepo : savedFlight
+FlightRepo --> Service : savedFlight
+
+Service --> Controller : FlightsResponse
+Controller --> FE : 200 OK + FlightsResponse
+@enduml

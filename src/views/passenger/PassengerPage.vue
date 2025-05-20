@@ -2,58 +2,73 @@
     <v-container>
         <loading-modal :visible="isLoading" />
         <v-row class="mb-4" align="center" justify="space-between">
-            <v-col cols="3">
-                <v-text-field v-model="searchQuery" label="Tìm kiếm (Tên, Hộ chiếu, Email)" outlined clearable />
+            <v-col cols="6">
+                <v-text-field
+                    v-model="searchQuery"
+                    :label="$t('searchPlaceholder')"
+                    outlined
+                />
             </v-col>
             <v-col cols="2">
-                <v-btn color="primary" @click="handleExport">Xuất Excel</v-btn>
+                <v-btn color="primary" @click="handleExport">{{ $t('exportBtn') }}</v-btn>
             </v-col>
         </v-row>
 
         <v-table>
             <thead>
             <tr>
-                <th>STT</th>
-                <th>Họ tên</th>
-                <th>Số hộ chiếu</th>
-                <th>Quốc tịch</th>
-                <th>Email</th>
-                <th>Thao tác</th>
+                <th>{{ $t('index') }}</th>
+                <th>{{ $t('fullName') }}</th>
+                <th>{{ $t('passportNumber') }}</th>
+                <th>{{ $t('nationalId') }}</th>
+                <th>{{ $t('nationality') }}</th>
+                <th>{{ $t('email') }}</th>
+                <th>{{ $t('actions') }}</th>
             </tr>
             </thead>
             <tbody>
             <tr v-if="!passengers.length && !isLoading">
-                <td colspan="6">Không có dữ liệu</td>
+                <td colspan="7">{{ $t('noData') }}</td>
             </tr>
             <tr v-for="(p, index) in passengers" :key="p.id">
                 <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
                 <td>{{ p.fullName }}</td>
                 <td>{{ p.passportNumber }}</td>
+                <td>{{ p.nationalId }}</td>
                 <td>{{ p.nationality }}</td>
                 <td>{{ p.email }}</td>
                 <td>
-                    <v-btn color="info" @click="viewHistory(p)">Lịch sử đặt vé</v-btn>
+                    <v-btn color="info" @click="viewHistory(p)">{{ $t('viewHistory') }}</v-btn>
                 </td>
             </tr>
             </tbody>
         </v-table>
+
         <success-modal
             :visible="isSuccessVisible"
-            :message="'Thông tin khách hàng lấy thành công!'"
+            :message="$t('successMessage')"
             @close="closeSuccessModal"
         />
 
-        <!-- Modal thông báo thất bại -->
-        <error-modal :visible="isErrorVisible" :message="errorMessage" @close="closeErrorModal" />
-        <v-pagination v-model="currentPage" :length="totalPages" :total-visible="5" />
-    </v-container>
-<!--    <TicketHistoryModal-->
-<!--        :visible="showTicketModal"-->
-<!--        :tickets="selectedTickets"-->
-<!--        @close="showTicketModal = false"-->
-<!--    />-->
+        <error-modal
+            :visible="isErrorVisible"
+            :message="errorMessage"
+            @close="closeErrorModal"
+        />
 
+        <v-pagination
+            v-model="currentPage"
+            :length="totalPages"
+            :total-visible="5"
+        />
+    </v-container>
+    <TicketHistoryModal
+        :visible="showTicketModal"
+        :tickets="selectedTickets"
+        @close="showTicketModal = false"
+    />
 </template>
+
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
@@ -96,7 +111,7 @@ const fetchPassengers = async () => {
         console.log('Passengers:', response.data.data.content);
 
         if (response.data.code == 200 || response.data.code === '200') {
-            isSuccessVisible.value = true;
+            // isSuccessVisible.value = true;
             passengers.value = response.data.data.content;
             totalPages.value = Math.ceil(response.data.data.totalElements / pageSize);
         }else{
@@ -138,8 +153,9 @@ const handleExport = async () => {
 const viewHistory = async (passenger) => {
     isLoading.value = true;
     try {
-        const res = await axios.get(`/tickets/passenger/${passenger.id}`);
+        const res = await axios.get(`/passengers/ticket/${passenger.id}`);
         selectedTickets.value = res.data.data;
+        console.log("data",res.data);
         showTicketModal.value = true;
     } catch (e) {
         console.error('Lỗi khi lấy lịch sử vé:', e);
@@ -151,7 +167,7 @@ const viewHistory = async (passenger) => {
 };
 
 onMounted(fetchPassengers);
-watch([currentPage, searchQuery], fetchPassengers);
+watch([currentPage, searchQuery], fetchPassengers, {immediate:true});
 </script>
 
 <style scoped>

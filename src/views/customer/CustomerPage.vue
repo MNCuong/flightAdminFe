@@ -2,57 +2,62 @@
     <v-container>
         <loading-modal :visible="isLoading" />
         <v-row class="mb-4" align="center" justify="space-between">
-
-
             <v-col cols="8">
-                <v-text-field v-model="searchQuery" label="Tìm kiếm khách hàng" outlined clearable hide-details="auto" />
+                <v-text-field v-model="searchQuery" :label="$t('labels.searchCustomer')" outlined clearable hide-details="auto" />
             </v-col>
             <v-col cols="4">
-                <v-btn color="success" @click="handleExport">Xuất Excel</v-btn>
+                <v-btn color="success" @click="handleExport">
+                    {{ $t('buttons.exportExcel') }}
+                </v-btn>
             </v-col>
         </v-row>
+
         <v-table>
             <thead>
-            <tr>
-                <th>STT</th>
-                <th>Tên Đầy Đủ</th>
-                <th>Email</th>
-                <th>Số Điện Thoại</th>
-                <th>Vai Trò</th>
-                <th>Thao Tác</th>
-            </tr>
+                <tr>
+                    <th>{{ $t('table.index') }}</th>
+                    <th>{{ $t('table.fullName') }}</th>
+                    <th>{{ $t('table.email') }}</th>
+                    <th>{{ $t('table.phone') }}</th>
+                    <th>{{ $t('table.active') }}</th>
+
+                    <th>{{ $t('table.roles') }}</th>
+                    <th>{{ $t('table.actions') }}</th>
+                </tr>
             </thead>
             <tbody>
-            <tr v-if="!users.length && !isLoading">
-                <td colspan="6">Không có dữ liệu</td>
-            </tr>
-            <tr v-for="(user, index) in users" :key="user?.id">
-                <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-                <td>{{ user?.fullName }}</td>
-                <td>{{ user?.email }}</td>
-                <td>{{ user?.phone }}</td>
-                <td>{{ user?.roles }}</td>
-                <td>
-<!--                    <v-btn color="primary" class="mr-2" @click="editUser(user)">Cập nhật</v-btn>-->
-                    <!-- Nút khóa hoặc mở tài khoản -->
-                    <v-btn
-                        v-if="!user.isLocked"
-                        class="red darken-1"
-                        @click="lockAccount(user)"
-                    >
-                        Khóa tài khoản
-                    </v-btn>
-                    <v-btn
-                        v-if="user.isLocked"
-                        class="green darken-1"
-                        @click="unlockAccount(user)"
-                    >
-                        Mở tài khoản
-                    </v-btn>
+                <tr v-if="!users.length && !isLoading">
+                    <td colspan="6">
+                        {{ $t('table.noCustomerData') }}
+                    </td>
+                </tr>
+                <tr v-for="(user, index) in users" :key="user?.id">
+                    <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+                    <td>{{ user?.fullName }}</td>
+                    <td>{{ user?.email }}</td>
+                    <td>{{ user?.phone }}</td>
+                    <td>
+                        <v-chip :color="setStatusColorActive(user?.active)" dark>
+                            {{ $t('labels.' + user?.active) }}
+                        </v-chip>
 
+                    </td>
+                    <td>
+                        <v-chip :color="setStatusColor(user?.roles)" dark>
+                            {{ $t('labels.' + user?.roles) }}
+                        </v-chip>
+                    </td>
+                    <td>
+                        <!-- Nút khóa hoặc mở tài khoản -->
+                        <v-btn v-if="user.active" color="error darken-1" @click="lockAccount(user)" icon>
+                            <v-icon>mdi-lock</v-icon>
+                        </v-btn>
+                        <v-btn v-if="!user.active" color="green darken-1" @click="lockAccount(user)" icon>
+                            <v-icon>mdi-lock-open</v-icon>
+                        </v-btn>
+                    </td>
 
-                </td>
-            </tr>
+                </tr>
             </tbody>
         </v-table>
 
@@ -60,12 +65,12 @@
         <confirm-delete-modal :visible="confirmDelete" :flightId="userToDelete?.id" @confirm="confirmDeleteAction" @close="cancelDelete" />
 
         <!-- Modal thông báo thành công -->
-        <success-modal :visible="isSuccessVisible" :message="'Tài khoản đã được cập nhật thành công!'" @close="closeSuccessModal" />
+        <success-modal :visible="isSuccessVisible" :message="$t('messages.accountUpdated')" @close="closeSuccessModal" />
 
         <!-- Modal thông báo thất bại -->
         <error-modal :visible="isErrorVisible" :message="errorMessage" @close="closeErrorModal" />
 
-        <!-- PHÂN TRANG: SỐ TRANG -->
+        <!-- PHÂN TRANG -->
         <v-pagination v-model="currentPage" :length="pageCount" :total-visible="5" />
     </v-container>
 </template>
@@ -79,6 +84,7 @@ import ErrorModal from '../../components/ErrorModal.vue';
 import LoadingModal from '@/components/LoadingModal.vue';
 import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
+
 const vuetify = createVuetify();
 const router = useRouter();
 
@@ -87,6 +93,25 @@ const currentPage = ref(1);
 const pageSize = 2;
 const totalItems = ref(0);
 const isLoading = ref(false);
+const searchQuery = ref('');
+
+function setStatusColor(status) {
+    const normalized = (status || '').toLowerCase();
+    if (normalized === 'user' || normalized === 'người dùng') {
+        return 'primary';
+    } else if (normalized === 'admin' || normalized === 'quản trị viên') {
+        return 'error';
+    } else {
+        return 'grey';
+    }
+}function setStatusColorActive(active) {
+    return active === true
+        ? 'primary darken-2'
+        : active === false
+            ? 'red darken-2'
+            : 'grey darken-1';
+}
+
 
 const fetchUsers = async () => {
     isLoading.value = true;
@@ -95,7 +120,8 @@ const fetchUsers = async () => {
         const response = await axios.get('/user/list-user', {
             params: {
                 page: currentPage.value - 1,
-                size: pageSize
+                size: pageSize,
+                search: searchQuery.value
             }
         });
         users.value = response.data.data.content;
@@ -108,9 +134,13 @@ const fetchUsers = async () => {
 };
 
 onMounted(fetchUsers);
-watch(currentPage, () => {
-    fetchUsers();
-});
+watch(
+    [currentPage, searchQuery],
+    () => {
+        fetchUsers();
+    },
+    { immediate: true }
+);
 
 const pageCount = computed(() => {
     return Math.ceil(totalItems.value / pageSize);
@@ -162,11 +192,13 @@ const closeErrorModal = () => {
 // Lock account logic
 const lockAccount = async (user) => {
     try {
-        const response = await axios.put(`/user/lock/${user.id}`);
+        const response = await axios.put(`/user/lock/${user.email}`);
+        console.log("email: ",user.email)
         if (response.status === 200) {
             user.isLocked = true; // Update the state to locked
             isSuccessVisible.value = true;
             errorMessage.value = '';
+            fetchUsers();
         } else {
             isErrorVisible.value = true;
             errorMessage.value = 'Không thể khóa tài khoản. Vui lòng thử lại!';

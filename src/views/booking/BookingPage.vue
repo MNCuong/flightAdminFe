@@ -27,7 +27,7 @@
             </thead>
             <tbody>
             <tr v-if="!bookings.length && !isLoading">
-                <td colspan="6">Không có dữ liệu</td>
+                <td colspan="6">Không có dữ liệu đặt vé</td>
             </tr>
             <tr v-for="(booking, index) in bookings" :key="booking?.id">
                 <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
