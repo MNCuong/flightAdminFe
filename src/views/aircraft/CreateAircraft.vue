@@ -54,19 +54,20 @@ const router = useRouter();
 
 // Khai báo các Enum có sẵn cho "status" và "typeEnums"
 const aircraftStatusEnum = ref([
-    { value: 'ACTIVE', text: 'ACTIVE' },
-    { value: 'IN_SERVICE', text: 'IN SERVICE' },
-    { value: 'STANDBY', text: 'STANDBY' },
-    { value: 'ON_GROUND', text: 'ON GROUND' },
-    { value: 'UNDER_MAINTENANCE', text: 'UNDER MAINTENANCE' },
-    { value: 'REPAIRING', text: 'REPAIRING' },
-    { value: 'OUT_OF_SERVICE', text: 'OUT OF SERVICE' },
-    { value: 'AOG', text: 'AOG' },
-    { value: 'RETIRED', text: 'RETIRED' },
-    { value: 'STORED', text: 'STORED' },
-    { value: 'SCRAPPED', text: 'SCRAPPED' },
-    { value: 'DELAYED', text: 'DELAYED' }
+    { value: 'ACTIVE', text: 'Hoạt động' },
+    { value: 'IN_SERVICE', text: 'Đang phục vụ' },
+    { value: 'STANDBY', text: 'Sẵn sàng' },
+    { value: 'ON_GROUND', text: 'Đang đỗ' },
+    { value: 'UNDER_MAINTENANCE', text: 'Đang bảo trì' },
+    { value: 'REPAIRING', text: 'Đang sửa chữa' },
+    { value: 'OUT_OF_SERVICE', text: 'Ngừng phục vụ' },
+    { value: 'AOG', text: 'Máy bay hỏng (AOG)' },
+    { value: 'RETIRED', text: 'Đã nghỉ hưu' },
+    { value: 'STORED', text: 'Đã lưu kho' },
+    { value: 'SCRAPPED', text: 'Đã phá dỡ' },
+    { value: 'DELAYED', text: 'Bị hoãn' }
 ]);
+
 
 const aircraftTypeEnum = ref([
     { value: 'AIRBUS_A320', text: 'Airbus A320' },

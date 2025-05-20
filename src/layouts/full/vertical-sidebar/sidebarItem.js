@@ -1,97 +1,106 @@
 import {
     LayoutDashboardIcon,
-    BorderAllIcon,
-    AlertCircleIcon,
-    CircleDotIcon,
-    BoxMultiple1Icon,
-    LoginIcon,
-    MoodHappyIcon,
-    ApertureIcon,
-    UserPlusIcon,
     PlaneIcon,
     PlaneDepartureIcon,
     UserIcon,
-    ChartPieIcon,
     LogoutIcon,
-    BookmarkIcon
+    StickerIcon,
+    GaugeIcon,
+    BookmarkIcon,
+    FileReportIcon,
 } from 'vue-tabler-icons';
 
 const sidebarItem = [
-    { header: 'Home' },
+    { header: 'sidebar.home' },
     {
-        title: 'Dashboard',
+        title: 'sidebar.logout',
+        icon: LogoutIcon,
+        BgColor: 'primary',
+        to: '/logout'
+    },
+    {
+        title: 'sidebar.dashboard',
         icon: LayoutDashboardIcon,
         BgColor: 'primary',
         to: '/'
     },
     {
-        title: 'Quản lý phi cơ',
+        title: 'sidebar.airlinesManagement',
         icon: PlaneIcon,
         BgColor: 'primary',
-              to: '/aircrafts'
+        to: '/airlines'
     },
     {
-        title: 'Quản lý chuyến bay',
+        title: 'sidebar.flightsManagement',
         icon: PlaneDepartureIcon,
         BgColor: 'primary',
-             to: '/flights'
+        // to: '/flights'
+        children: [
+            {
+                title: 'Danh sách chuyến bya',
+                to: '/flights',
+                icon: UserIcon
+            },
+            {
+                title: 'Thêm khách hàng',
+                to: '/',
+                icon: UserIcon
+            }
+        ]
     },
-
     {
-        title: 'Quản lý khách hàng',
+        title: 'sidebar.accountsManagement',
         icon: UserIcon,
         BgColor: 'primary',
-        // children: [
-        //     {
-        //         title: 'Danh sách khách hàng',
-        //         to: '/',
-        //         icon: UserIcon
-        //     },
-        //     {
-        //         title: 'Thêm khách hàng',
-        //         to: '/',
-        //         icon: UserIcon
-        //     }
-        // ]
         to: '/customer'
     },
     {
-        title: 'Quản lý đặt vé',
-        icon: BookmarkIcon,
-        BgColor: 'primary',
-        to: '/booking'
-    }, {
-        title: 'Quản lý vé',
-        icon: BookmarkIcon,
+        title: 'sidebar.ticketsManagement',
+        icon: StickerIcon,
         BgColor: 'primary',
         to: '/tickets'
     },
     {
-        title: 'Thông tin hành khách',
-        icon: BookmarkIcon,
+        title: 'sidebar.passengersInfo',
+        icon: GaugeIcon,
         BgColor: 'primary',
         to: '/passengers'
     },
     {
-        title: 'Quản lý phi hành đoàn',
+        title: 'sidebar.contact',
+        icon: GaugeIcon,
+        BgColor: 'primary',
+        to: '/contact'
+    },
+    {
+        title: 'sidebar.systemManagement',
         icon: BookmarkIcon,
         BgColor: 'primary',
-        to: '/crew-members'
+        to: '/system'
     },
-
     {
-        title: 'Báo cáo thống kê',
-        icon: ChartPieIcon,
+        title: 'sidebar.airportsManagement',
+        icon: BookmarkIcon,
+        BgColor: 'primary',
+        to: '/airports'
+    },
+    {
+        title: 'sidebar.statisticalReport',
+        icon: FileReportIcon,
         BgColor: 'primary',
         to: '/statistical-report'
     },
-    { header: 'Logout' },
     {
-        title: 'Đăng xuất',
-        icon: LogoutIcon,
+        title: '',
         BgColor: 'primary',
-        to: '/logout'
-    }
+        to: '/'
+    },
+    {
+        title: '',
+        icon: FileReportIcon,
+        BgColor: 'primary',
+        to: '/'
+    },
 ];
 
 export default sidebarItem;

@@ -1,18 +1,19 @@
 <template>
     <v-dialog v-model="visible" max-width="400px" persistent @after-leave="resetAnimation">
         <v-card class="elevation-10">
-            <v-card-title class="headline text-center">Lỗi!</v-card-title>
+            <v-card-title class="headline text-center">{{ $t('errorModal.title') }}</v-card-title>
             <v-card-text class="text-center">
                 <!-- Dấu "x" với hiệu ứng động chỉ khi mở -->
-                <v-icon large color="red" :class="{'error-icon': visible}" ref="errorIcon">mdi-close-circle</v-icon>
+                <v-icon large color="red" :class="{ 'error-icon': visible }" ref="errorIcon">mdi-close-circle</v-icon>
                 <p class="mt-4">{{ message }}</p>
             </v-card-text>
             <v-card-actions class="d-flex justify-center">
-                <v-btn color="red" @click="closeModal" class="text-white">Đóng</v-btn>
+                <v-btn color="red" @click="closeModal" class="text-white">{{ $t('buttons.close') }}</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
+
 
 <script>
 export default {

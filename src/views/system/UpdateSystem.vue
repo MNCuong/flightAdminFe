@@ -95,7 +95,6 @@ const closeSuccessModal = () => {
     router.push({ name: 'CrewMemberPage' });
 };
 
-// Close Error Modal
 const closeErrorModal = () => {
     isErrorVisible.value = false;
 };

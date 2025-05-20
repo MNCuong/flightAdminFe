@@ -23,19 +23,38 @@ const errorMessage = ref('');
 const flightId = route.params.id;
 
 const statusOptions = ref([
-    { value: 'ACTIVE', label: 'ACTIVE' },
-    { value: 'IN_SERVICE', label: 'IN SERVICE' },
-    { value: 'STANDBY', label: 'STANDBY' },
-    { value: 'ON_GROUND', label: 'ON GROUND' },
-    { value: 'UNDER_MAINTENANCE', label: 'UNDER MAINTENANCE' },
-    { value: 'REPAIRING', label: 'REPAIRING' },
-    { value: 'OUT_OF_SERVICE', label: 'OUT OF SERVICE' },
-    { value: 'AOG', label: 'AOG' },
-    { value: 'RETIRED', label: 'RETIRED' },
-    { value: 'STORED', label: 'STORED' },
-    { value: 'SCRAPPED', label: 'SCRAPPED' },
-    { value: 'DELAYED', label: 'DELAYED' }
+    { label: 'Sẵn sàng sử dụng', value: 'AVAILABLE' },
+    { label: 'Đang hoạt động', value: 'IN_SERVICE' },
+    { label: 'Đang bảo trì', value: 'MAINTENANCE' },
+    { label: 'Đang bay', value: 'IN_FLIGHT' },
+    { label: 'Đã hạ cánh', value: 'LANDED' },
+    { label: 'Bị hoãn', value: 'DELAYED' },
+    { label: 'Hủy chuyến bay', value: 'CANCELLED' },
+    { label: 'Đang đỗ tại sân bay', value: 'GROUND' },
+    { label: 'Đang tiếp nhiên liệu', value: 'REFUELING' },
+    { label: 'Đang đỗ tại bãi', value: 'PARKED' },
+    { label: 'Kiểm tra kỹ thuật', value: 'CHECKING' },
+    { label: 'Ngừng hoạt động', value: 'RETIREMENT' }
 ]);
+const getStatusLabel = (statusValue) => {
+    const statusMap = {
+        'AVAILABLE': 'Sẵn sàng sử dụng',
+        'IN_SERVICE': 'Đang hoạt động',
+        'MAINTENANCE': 'Đang bảo trì',
+        'IN_FLIGHT': 'Đang bay',
+        'LANDED': 'Đã hạ cánh',
+        'DELAYED': 'Bị hoãn',
+        'CANCELLED': 'Hủy chuyến bay',
+        'GROUND': 'Đang đỗ tại sân bay',
+        'REFUELING': 'Đang tiếp nhiên liệu',
+        'PARKED': 'Đang đỗ tại bãi',
+        'CHECKING': 'Kiểm tra kỹ thuật',
+        'RETIREMENT': 'Ngừng hoạt động'
+    };
+
+    return statusMap[statusValue] || statusValue;
+};
+
 // Fetch flight details
 
 const fetchFlightDetails = async () => {
@@ -45,7 +64,7 @@ const fetchFlightDetails = async () => {
         airlines.value = flightDetails.value.airlines.name;
         registration.value = flightDetails.value.registration;
         type.value = flightDetails.value.type;
-        status.value = flightDetails.value.status;
+        status.value = getStatusLabel(flightDetails.value.status);
         imageUrl.value = flightDetails.value.imgUrl;
         createAt.value = flightDetails.value.createAt;
         updateAt.value = flightDetails.value.updateAt;
@@ -173,7 +192,7 @@ const goBack = () => {
                 <v-text-field v-model="updateAt" label="Ngày cập nhật" required disabled />
                 <v-text-field v-model="type" label="Loại phi cơ" required disabled />
                 <v-text-field v-model="airlines" label="Hãng hàng không" required disabled />
-                <v-text-field v-model="seat" label="Số chỗ ngồi" required disabled readonly />
+                <v-text-field v-model="seats" label="Số chỗ ngồi" required disabled readonly />
 
 
 
@@ -187,7 +206,7 @@ const goBack = () => {
                     hide-details="true"
                     required
                     disabled
-                />            </v-col>
+                />         </v-col>
         </v-row>
 
         <!-- Modal xác nhận xóa -->

@@ -1,14 +1,14 @@
 <template>
     <v-dialog v-model="visible" max-width="400px" persistent>
         <v-card class="elevation-10">
-            <v-card-title class="headline text-center">Xác Nhận Xóa</v-card-title>
+            <v-card-title class="headline text-center">{{ $t('confirmDelete.title') }}</v-card-title>
             <v-card-text class="text-center">
                 <v-icon large color="red">mdi-alert-circle-outline</v-icon>
-                <p class="mt-4">Bạn có chắc chắn muốn xóa không?</p>
+                <p class="mt-4">{{ $t('confirmDelete.message') }}</p>
             </v-card-text>
             <v-card-actions class="d-flex justify-center">
-                <v-btn color="grey" @click="cancel" class="mr-3">Hủy</v-btn>
-                <v-btn color="red" @click="confirmDelete" class="text-white">Xóa</v-btn>
+                <v-btn color="grey" @click="cancel" class="mr-3">{{ $t('buttons.cancel') }}</v-btn>
+                <v-btn color="red" @click="confirmDelete" class="text-white">{{ $t('buttons.confirmDelete') }}</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

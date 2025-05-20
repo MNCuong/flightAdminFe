@@ -1,147 +1,140 @@
 <template>
-    <!--  <v-card class="white pa-4" flat>-->
-    <!--    <h1 class="text-h4 mb-4 font-weight-bold">Báo cáo thống kê</h1>-->
-
-    <!-- Thống kê tổng quan -->
-    <v-row justify="space-between" align="center" no-gutters>
+    <v-container>
+        <!-- Thống kê tổng quan -->
         <v-row justify="space-between" align="center" no-gutters>
-            <!-- Tổng số giao dịch -->
             <v-col cols="12" sm="4" md="3" class="d-flex flex-column align-center pa-3">
                 <v-icon class="mb-2" color="blue">mdi-transaction</v-icon>
-                <h4 class="text-h6 font-weight-medium">Tổng số giao dịch</h4>
+                <h4 class="text-h6 font-weight-medium">{{ $t('stats.totalBookings') }}</h4>
                 <p class="text-info text-h4">{{ stats.totalBookings }}</p>
             </v-col>
 
-            <!-- Tổng khách hàng -->
             <v-col cols="12" sm="4" md="3" class="d-flex flex-column align-center pa-3">
                 <v-icon class="mb-2" color="green">mdi-account-group</v-icon>
-                <h4 class="text-h6 font-weight-medium">Tổng khách hàng</h4>
+                <h4 class="text-h6 font-weight-medium">{{ $t('stats.totalCustomers') }}</h4>
                 <p class="text-success text-h4">{{ stats.totalCustomers }}</p>
             </v-col>
 
-            <!-- Số lượng vé đặt trong tháng -->
             <v-col cols="12" sm="4" md="3" class="d-flex flex-column align-center pa-3">
                 <v-icon class="mb-2" color="purple">mdi-calendar-month</v-icon>
-                <h4 class="text-h6 font-weight-medium">Số lượng vé đặt trong tháng</h4>
+                <h4 class="text-h6 font-weight-medium">{{ $t('stats.monthlyBookings') }}</h4>
                 <p class="text-warning text-h4">{{ stats.totalBookingCustomers }}</p>
             </v-col>
 
-            <!-- Tổng doanh thu -->
             <v-col cols="12" sm="4" md="3" class="d-flex flex-column align-center pa-3">
                 <v-icon class="mb-2" color="red">mdi-currency-vnd</v-icon>
-                <h4 class="text-h6 font-weight-medium">Tổng doanh thu trong ngày</h4>
+                <h4 class="text-h6 font-weight-medium">{{ $t('stats.dailyRevenue') }}</h4>
                 <p class="text-danger text-h4">{{ formatCurrency(stats.totalRevenue) }}</p>
             </v-col>
         </v-row>
-    </v-row>
-    <hr class="my-4" />
-    <v-row class="mb-4" align="center" justify="space-between">
-        <v-col cols="8">
-            <v-text-field v-model="searchQuery" label="Tìm kiếm giao dịch" outlined clearable hide-details="auto" />
-        </v-col>
-        <v-col cols="4">
-            <v-btn color="success" @click="handleExport">Xuất Excel</v-btn>
-        </v-col>
-    </v-row>
-    <v-table>
-        <thead>
+
+        <hr class="my-4" />
+
+        <!-- Tìm kiếm và Xuất Excel -->
+        <v-row class="mb-4" align="center" justify="space-between">
+            <v-col cols="8">
+                <v-text-field
+                    v-model="searchQuery"
+                    :label="$t('search.transactionNo')"
+                    outlined
+                    clearable
+                    hide-details="auto"
+                    @keyup.enter="fetchBookings"
+                />
+            </v-col>
+            <v-col cols="4">
+                <v-btn color="success" @click="handleExport">{{ $t('buttons.exportExcel') }}</v-btn>
+            </v-col>
+        </v-row>
+
+        <!-- Bảng danh sách booking -->
+        <v-table>
+            <thead>
             <tr>
                 <th>STT</th>
-                <th>Mã giao dịch</th>
-                <th>Tên khách hàng</th>
-                <th>Ngày đặt vé</th>
-                <!--            <th>Loại vé</th>-->
-                <th>Giá</th>
-                <th>Ghi chú</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
+                <th>{{ $t('booking.transactionNo') }}</th>
+                <th>{{ $t('booking.customerName') }}</th>
+                <th>{{ $t('booking.bookingDate') }}</th>
+                <th>{{ $t('booking.price') }}</th>
+                <th>{{ $t('booking.note') }}</th>
+                <th>{{ $t('booking.status') }}</th>
+                <th>{{ $t('booking.actions') }}</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             <tr v-if="!bookings.length && !isLoading">
-                <td colspan="8">Không có dữ liệu</td>
+                <td colspan="8">{{ $t('booking.noData') }}</td>
             </tr>
             <tr v-for="(booking, index) in bookings" :key="booking.id">
                 <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
                 <td>{{ booking.transactionNo }}</td>
                 <td>{{ booking.user.fullName }}</td>
-                <td>{{ booking.transactionDate }}</td>
-                <!--            <td>{{ booking.typeBooking }}</td>-->
-                <!--            <td>{{ booking.amount | currency }}</td>-->
+                <td>{{ formatDate(booking.transactionDate) }}</td>
                 <td>{{ formatCurrency(booking.amount) }}</td>
-
                 <td class="small-text">{{ booking.description }}</td>
                 <td class="small-text">{{ booking.status }}</td>
                 <td>
-                    <v-btn color="primary" class="mr-2" @click="paymentDetail(booking)"> Chi tiết</v-btn>
+                    <v-btn color="primary" class="mr-2" @click="paymentDetail(booking)">{{ $t('buttons.detail') }}</v-btn>
                 </td>
             </tr>
-        </tbody>
-    </v-table>
+            </tbody>
+        </v-table>
 
-    <!-- Phân trang -->
-    <v-pagination v-model="currentPage" :length="pageCount" :total-visible="5" @input="fetchBookings" />
-    <hr class="my-4" />
+        <!-- Phân trang -->
+        <v-pagination
+            v-model="currentPage"
+            :length="pageCount"
+            :total-visible="5"
+            @input="fetchBookings"
+        />
 
-    <!-- Biểu đồ thống kê -->
-    <v-card class="pa-4">
+        <hr class="my-4" />
 
-        <v-row align="center" justify="space-between" class="mb-4">
-            <v-col cols="6" md="3">
-                <v-select
-                    v-model="selectedPeriodType"
-                    :items="['monthly', 'daily', 'quarterly']"
-                    label="Chọn loại thống kê"
-                    @change="fetchRevenueData"
-                />
-            </v-col>
-            <v-col cols="6" md="3">
-                <v-text-field
-                    v-model="selectedYear"
-                    label="Chọn năm"
-                    type="number"
-                    @change="fetchRevenueData"
-                />
-            </v-col>
-            <v-col cols="6" md="3" v-if="selectedPeriodType !== 'quarterly'">
-                <v-text-field
-                    v-model="selectedMonth"
-                    label="Chọn tháng"
-                    type="number"
-                    min="1"
-                    max="12"
-                    @change="fetchRevenueData"
-                    v-if="selectedPeriodType === 'daily'"
-                />
-            </v-col>
-            <v-col cols="6" md="3" v-if="selectedPeriodType === 'quarterly'">
-                <v-text-field
-                    v-model="selectedQuarter"
-                    label="Chọn quý"
-                    type="number"
-                    min="1"
-                    max="4"
-                    @change="fetchRevenueData"
-                />
-            </v-col>
-        </v-row>
-<!--        <v-row>-->
-<!--            <v-col cols="12" md="6">-->
-<!--                <div class="text-subtitle-1">TỔNG DOANH THU</div>-->
-<!--                <div class="text-h5 font-weight-bold text-primary">-->
-<!--                    {{ formatCurrency(totalRevenue) }}-->
-<!--                </div>-->
-<!--                <div class="text-success font-weight-bold">-->
-<!--                    ⬆ {{ growthRate }}%-->
-<!--                </div>-->
-<!--            </v-col>-->
-<!--        </v-row>-->
+        <!-- Biểu đồ thống kê -->
+        <v-card class="pa-4">
+            <v-row align="center" justify="space-between" class="mb-4">
+                <v-col cols="6" md="3">
+                    <v-select
+                        v-model="selectedPeriodType"
+                        :items="periodTypes"
+                        :label="$t('chart.selectPeriod')"
+                        @change="fetchRevenueData"
+                    />
+                </v-col>
+                <v-col cols="6" md="3">
+                    <v-text-field
+                        v-model="selectedYear"
+                        :label="$t('chart.selectYear')"
+                        type="number"
+                        @change="fetchRevenueData"
+                    />
+                </v-col>
+                <v-col cols="6" md="3" v-if="selectedPeriodType !== 'quarterly'">
+                    <v-text-field
+                        v-model="selectedMonth"
+                        :label="$t('chart.selectMonth')"
+                        type="number"
+                        min="1"
+                        max="12"
+                        v-if="selectedPeriodType === 'daily'"
+                        @change="fetchRevenueData"
+                    />
+                </v-col>
+                <v-col cols="6" md="3" v-if="selectedPeriodType === 'quarterly'">
+                    <v-text-field
+                        v-model="selectedQuarter"
+                        :label="$t('chart.selectQuarter')"
+                        type="number"
+                        min="1"
+                        max="4"
+                        @change="fetchRevenueData"
+                    />
+                </v-col>
+            </v-row>
 
-        <Chart :data="chartData.data" :options="chartData.options" />
-    </v-card>
-
+            <Chart :data="chartData.data" :options="chartData.options" />
+        </v-card>
+    </v-container>
 </template>
-
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -162,6 +155,7 @@ const customers = ref([]);
 const currentPage = ref(1);
 const pageSize = ref(5);
 const isLoading = ref(true);
+const searchQuery = ref('');
 const today = new Date();
 const startOfDay = new Date(today.setHours(0, 0, 0, 0));
 const endOfDay = new Date(today.setHours(23, 59, 59, 999));
@@ -192,7 +186,8 @@ const fetchBookings = async () => {
             const response = await axios.get('/payment/list-transaction', {
                 params: {
                     page: currentPage,
-                    size: pageSize.value
+                    size: pageSize.value,
+                    searchQuery: searchQuery.value
                 }
             });
 

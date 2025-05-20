@@ -89,7 +89,7 @@ const submitForm = async () => {
             createAt: new Date().toISOString(),
             updateAt: new Date().toISOString()
         };
-        const response = await axios.post('/crew-member/create', payload);
+        const response = await axios.post('/system/create', payload);
         console.log(payload);
         if (response.data.code === '200') {
             isSuccessVisible.value = true;
@@ -105,11 +105,11 @@ const submitForm = async () => {
 };
 
 const goBack = () => {
-    router.push({ name: 'CrewMemberPage' });
+    router.push({ name: 'SystemPage' });
 };
 const closeSuccessModal = () => {
     isSuccessVisible.value = false;
-    router.push({ name: 'CrewMemberPage' });
+    router.push({ name: 'SystemPage' });
 };
 
 // Close Error Modal

@@ -19,17 +19,17 @@
             <tr>
                 <th>STT</th>
                 <th>Hình ảnh</th>
-                <th>Mã Chuyến Bay</th>
-                <th>Hãng Hàng Không</th>
+                <th>Mã phi cơ</th>
+<!--                <th>Hãng hàng không</th>-->
                 <th>Ngày tạo</th>
                 <th>Ngày cập nhật</th>
                 <th>Trạng thái</th>
-                <th>Thao Tác</th>
+                <th>Thao tác</th>
             </tr>
             </thead>
             <tbody>
             <tr v-if="!currentPageData.length && !isLoading">
-                <td colspan="6">Không có dữ liệu</td>
+                <td colspan="6">Không có phi cơ</td>
             </tr>
             <tr v-for="(aircraft, index) in currentPageData" :key="aircraft.id">
                 <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
@@ -55,10 +55,10 @@
 
                 </td>
                 <td>{{ aircraft.registration }}</td>
-                <td>{{ aircraft.airlines.name }}</td>
+<!--                <td>{{ aircraft.airlines.name }}</td>-->
                 <td>{{ aircraft.createAt }}</td>
                 <td>{{ aircraft.updateAt }}</td>
-                <td>{{ aircraft.status }}</td>
+                <td>{{ getStatusLabel(aircraft.status) }}</td>
                 <td>
                     <v-btn color="primary" class="mr-2" @click="editAircraft(aircraft)"> Cập nhật</v-btn>
                 </td>
@@ -84,18 +84,36 @@ const pageSize = 10;
 
 const searchQuery = ref('');
 const isLoading = ref(false);
-const totalPages = ref(1); // Use ref to store totalPages
+const totalPages = ref(1);
 
 const currentPageData = computed(() => aircrafts.value);
 
+const getStatusLabel = (statusValue) => {
+    const statusMap = {
+        'AVAILABLE': 'Sẵn sàng sử dụng',
+        'IN_SERVICE': 'Đang hoạt động',
+        'MAINTENANCE': 'Đang bảo trì',
+        'IN_FLIGHT': 'Đang bay',
+        'LANDED': 'Đã hạ cánh',
+        'DELAYED': 'Bị hoãn',
+        'CANCELLED': 'Hủy chuyến bay',
+        'GROUND': 'Đang đỗ tại sân bay',
+        'REFUELING': 'Đang tiếp nhiên liệu',
+        'PARKED': 'Đang đỗ tại bãi',
+        'CHECKING': 'Kiểm tra kỹ thuật',
+        'RETIREMENT': 'Ngừng hoạt động'
+    };
 
+    return statusMap[statusValue] || statusValue;
+};
 const fetchAircrafts = async () => {
     isLoading.value = true;
     try {
         const response = await axios.get('/flight/aircraft/list-aircraft-by-airline', {
             params: {
                 page: currentPage.value - 1,
-                size: pageSize
+                size: pageSize,
+                search:searchQuery.value
             }
         });
         console.log('Fetched data:', response.data.data.content);
@@ -110,6 +128,7 @@ const fetchAircrafts = async () => {
 
 onMounted(fetchAircrafts);
 watch(currentPage, fetchAircrafts);
+watch(searchQuery, fetchAircrafts, { immediate: true });
 
 function addAircraft() {
     router.push({ name: 'CreateAircraft' });
@@ -127,8 +146,7 @@ function handleExport() {
 
     const formattedData = aircrafts.value.map((aircraft, index) => ({
         STT: index + 1,
-        'Mã Chuyến Bay': aircraft.registration,
-        'Hãng Hàng Không': aircraft.airlines.name,
+        'Mã Phi cơ': aircraft.registration,
         'Ngày Tạo': new Date(aircraft.createAt).toLocaleDateString('vi-VN'),
         'Ngày Cập Nhật': new Date(aircraft.updateAt).toLocaleDateString('vi-VN')
     }));

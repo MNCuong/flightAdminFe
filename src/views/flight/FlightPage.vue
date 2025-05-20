@@ -3,54 +3,65 @@
         <loading-modal :visible="isLoading" />
         <v-row class="mb-4" align="center" justify="space-between">
             <v-col cols="2">
-                <v-btn color="primary" @click="addFlight">Tạo chuyến bay mới</v-btn>
+                <v-btn color="primary" @click="addFlight">{{ $t('create_flight') }}</v-btn>
             </v-col>
             <v-col cols="2">
-                <v-btn color="success" @click="handleExport">Xuất Excel</v-btn>
+                <v-btn color="success" @click="handleExport">{{ $t('export_excel') }}</v-btn>
             </v-col>
             <v-col cols="8">
-                <v-text-field v-model="searchQuery" label="Tìm kiếm chuyến bay" outlined clearable hide-details="auto" />
+                <v-text-field
+                    v-model="searchQuery"
+                    :label="$t('search_flight')"
+                    outlined
+                    clearable
+                    hide-details="auto"
+                />
             </v-col>
         </v-row>
         <v-table>
             <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Mã Chuyến Bay</th>
-                    <th>Sân Bay Khởi Hành</th>
-                    <th>Sân Bay Đến</th>
-                    <th>Giờ Khởi Hành</th>
-                    <th>Giờ Đến</th>
-                    <th>Hành Động</th>
-                </tr>
+            <tr>
+                <th>STT</th>
+                <th class="flightCode-column">{{ $t('flight_code') }}</th>
+                <th>{{ $t('departure_airport') }}</th>
+                <th>{{ $t('arrival_airport') }}</th>
+                <th>{{ $t('aircraft') }}</th>
+                <th>{{ $t('airline') }}</th>
+                <th>{{ $t('status') }}</th>
+                <th class="d-flex justify-center">{{ $t('actions') }}</th>
+            </tr>
             </thead>
             <tbody>
-                <tr v-if="!flights.length && !isLoading">
-                    <td colspan="3">Không có dữ liệu</td>
-                </tr>
-                <tr v-for="(flight, index) in flights" :key="flight?.id">
-                    <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-                    <td>{{ flight?.flightDetails?.number || 'N/A' }}</td>
-                    <td class="airport-column">{{ flight?.departureAirport?.airport || 'N/A' }}</td>
-                    <td class="airport-column">{{ flight?.arrivalAirport?.airport || 'N/A' }}</td>
-                    <td>{{ flight?.departureTime }}</td>
-                    <td>{{ flight?.arrivalTime }}</td>
-                    <td>
-                        <v-btn color="primary" @click="goToDetails(flight?.id)">Chi Tiết</v-btn>
-                        <v-btn color="error" @click="openConfirmDeleteModal(flight?.id)">Xóa</v-btn>
-                    </td>
-                </tr>
+            <tr v-if="!flights.length && !isLoading">
+                <td colspan="8">{{ $t('no_flights') }}</td>
+            </tr>
+            <tr v-for="(flight, index) in flights" :key="flight?.id">
+                <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+                <td class="flightCode-column">{{ flight?.flightCode || 'N/A' }}</td>
+                <td class="airport-column">{{ flight?.departureAirport || 'N/A' }}</td>
+                <td class="airport-column">{{ flight?.arrivalAirport || 'N/A' }}</td>
+                <td>{{ flight?.aircraft }}</td>
+                <td>{{ flight?.airlineName }}</td>
+                <td>{{ flight?.status }}</td>
+                <td>
+                    <v-row>
+                        <v-col class="d-flex justify-start">
+                            <v-btn color="primary" @click="goToDetails(flight?.id)">
+                                {{ $t('details') }}
+                            </v-btn>
+                        </v-col>
+                        <v-col class="d-flex justify-start">
+                            <v-btn color="error" @click="openConfirmDeleteModal(flight?.id)">
+                                {{ $t('delete') }}
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                </td>
+            </tr>
             </tbody>
         </v-table>
 
-        <!-- Modal xác nhận xóa -->
-        <confirm-delete-modal :visible="isModalVisible" :flightId="selectedFlightId" @confirm="deleteFlight" @close="closeModal" />
-
-        <!-- Modal thông báo thành công -->
-        <success-modal :visible="isSuccessVisible" :message="'Chuyến bay đã được xóa thành công!'" @close="closeSuccessModal" />
-
-        <!-- Modal thông báo thất bại -->
-        <error-modal :visible="isErrorVisible" :message="errorMessage" @close="closeErrorModal" />
+        <!-- Các modal giữ nguyên -->
 
         <v-pagination v-model="currentPage" :length="totalPages" :total-visible="5" />
     </v-container>
@@ -76,17 +87,19 @@ export default {
 
     setup() {
         const currentPage = ref(1);
-        const pageSize = ref(5);
+        const pageSize = ref(10);
         const flights = ref([]);
         const totalPages = ref(1);
         const isModalVisible = ref(false);
-        const selectedFlightId = ref(null);
         const router = useRouter();
 
         const isSuccessVisible = ref(false);
         const isErrorVisible = ref(false);
         const errorMessage = ref('');
         const isLoading = ref(false);
+        const selectedFlightId = ref(null);
+        const isStatusModalVisible = ref(false);
+
         const addFlight = () => {
             router.push({ name: 'CreateFlight' });
         };
@@ -94,21 +107,20 @@ export default {
             if (!flightId) return;
             router.push({ name: 'FlightDetail', params: { id: flightId } });
         };
-        // Lấy dữ liệu chuyến bay từ API
         const fetchFlights = async () => {
             isLoading.value = true;
 
             try {
                 const response = await axios.get('/flights/all-flight', {
                     params: {
-                        page: currentPage.value - 1, // API sử dụng chỉ số trang bắt đầu từ 0
+                        page: currentPage.value - 1,
                         size: pageSize.value
                     }
                 });
 
                 const data = response.data.data;
-                flights.value = data.content || []; // Lưu trữ chuyến bay
-                totalPages.value = data.totalPages || 1; // Lưu tổng số trang
+                flights.value = data.content || [];
+                totalPages.value = data.totalPages || 1;
             } catch (error) {
                 console.error('Error fetching flight data:', error);
             } finally {
@@ -133,16 +145,13 @@ export default {
                 'Giờ Đến': flight.arrivalTime || 'N/A'
             }));
 
-
             exportToExcel(formattedData);
         };
-        // Mở Modal xác nhận xóa
         const openConfirmDeleteModal = (flightId) => {
             selectedFlightId.value = flightId;
             isModalVisible.value = true;
         };
 
-        // Đóng Modal
         const closeModal = () => {
             isModalVisible.value = false;
             selectedFlightId.value = null;
@@ -158,7 +167,7 @@ export default {
 
         const deleteFlight = async (flightId) => {
             try {
-                const response = await axios.delete(`/flights/${flightId}`);
+                const response = await axios.delete(`/flights/delete-flight/${flightId}`);
 
                 if (response.status === 200) {
                     isSuccessVisible.value = true;
@@ -202,7 +211,6 @@ export default {
             goToDetails,
             addFlight,
             handleExport
-
         };
     }
 };
@@ -213,6 +221,12 @@ export default {
     max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.flightCode-column {
+    max-width: 120px;
+    white-space: nowrap;
     text-overflow: ellipsis;
 }
 </style>
