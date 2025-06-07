@@ -156,12 +156,12 @@ const MainRoutes = {
             meta: { title: 'create_airport' },
             component: () => import('@/views/airport/CreateAirport.vue')
         },
-        {
-            name: 'AccountDetailPage',
-            path: '/account-detail',
-            meta: { title: 'account_detail' },
-            component: () => import('@/views/')
-        },
+        // {
+        //     name: 'AccountDetailPage',
+        //     path: '/account-detail',
+        //     meta: { title: 'account_detail' },
+        //     component: () => import('@/views/')
+        // },
         {
             name: 'ContactPage',
             path: '/contact',
